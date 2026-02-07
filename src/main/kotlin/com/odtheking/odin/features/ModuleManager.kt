@@ -96,7 +96,7 @@ object ModuleManager {
      */
     fun registerModules(config: ModuleConfig, vararg modules: Module) {
         for (module in modules) {
-            if (module.isDevModule && !FabricLoader.getInstance().isDevelopmentEnvironment) continue
+            // if (module.isDevModule && !FabricLoader.getInstance().isDevelopmentEnvironment) continue
 
             val lowercase = module.name.lowercase()
             config.modules[lowercase] = module
