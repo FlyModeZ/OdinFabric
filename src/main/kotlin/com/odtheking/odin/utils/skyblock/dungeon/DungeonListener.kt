@@ -13,6 +13,7 @@ import com.odtheking.odin.features.impl.dungeon.LeapMenu
 import com.odtheking.odin.features.impl.dungeon.LeapMenu.odinSorting
 import com.odtheking.odin.features.impl.dungeon.Mimic
 import com.odtheking.odin.utils.network.WebUtils.hasBonusPaulScore
+import com.odtheking.odin.utils.noControlCodes
 import com.odtheking.odin.utils.romanToInt
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getDungeonTeammates
 import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
@@ -20,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.minecraft.network.protocol.game.*
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.player.Player
 import kotlin.jvm.optionals.getOrNull
 
 object DungeonListener {
@@ -79,10 +81,10 @@ object DungeonListener {
         }
 
         onReceive<ClientboundSetPlayerTeamPacket> {
-            val text = parameters?.getOrNull()?.let { it.playerPrefix?.string?.plus(it.playerSuffix?.string) } ?: return@onReceive
+            val text = parameters?.getOrNull()?.let { it.playerPrefix?.string?.plus(it.playerSuffix?.string).noControlCodes } ?: return@onReceive
 
             floorRegex.find(text)?.groupValues?.get(1)?.let {
-                scope.launch(Dispatchers.IO) { paul = hasBonusPaulScore() }
+                if (floor == null) scope.launch(Dispatchers.IO) { paul = hasBonusPaulScore() }
                 floor = Floor.valueOf(it)
             }
 
@@ -129,7 +131,7 @@ object DungeonListener {
         onReceive<ClientboundAddEntityPacket> {
             if (type == EntityType.PLAYER)
                 DungeonUtils.dungeonTeammates.find { it.entity == null && it.name == mc.level?.getEntity(id)?.name?.string }?.entity =
-                    mc.level?.getEntity(id) as? net.minecraft.world.entity.player.Player
+                    mc.level?.getEntity(id) as? Player
         }
     }
 
